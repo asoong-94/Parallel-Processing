@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 
-void recippar() {
+int recippar(int **edges, int nrow) {
 
 	return; 
 }
