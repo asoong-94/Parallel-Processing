@@ -60,8 +60,8 @@ int** generate_array(int N) {
 	}
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < 2; j++) {
-			arr[i][0] = rand() % 10;
-			arr[i][1] = rand() % 10;
+			arr[i][0] = rand() % 3;
+			arr[i][1] = rand() % 3;
 		}
 	}
 
@@ -82,12 +82,11 @@ void main(int argc, char** argv) {
 	// 		{6,2},	// match 3
 	// 	};
 
-	int N = 50;
+	int N = 10;
 	int** data_arr = generate_array(N);
 	for (int i = 0; i < N; i++) {
 		printf("a: %d ", data_arr[i][0]);
 		printf("b: %d\n", data_arr[i][1]);
-
 	}
 
 	int score = recippar(data_arr, N);
