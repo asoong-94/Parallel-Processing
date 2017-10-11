@@ -3,18 +3,22 @@
 #include <stdio.h>
 
 
+// tuple that holds data
 typedef struct {
 	int v1; 
 	int v2; 
 } tuple; 
 
+
+// if match, add 1 to score
 int compare(tuple *t1, tuple *t2) {
 	if ((t1->v1 == t2->v1) && (t1->v2 == t2->v2))
-		return 0;
+		return 1;
 
-	return -1;
+	return 0;
 }
 
+// reverse tuple
 tuple* reverse(tuple *t) {
 	tuple *t2 = (tuple*) malloc(sizeof(tuple));
 	t2->v1 = t->v2; 
@@ -23,59 +27,71 @@ tuple* reverse(tuple *t) {
 	return t2; 
 }
 
+// find num of reciprocal pairs
+int recippar(int **data, int N) {
 
-void recippar(int data[9][2]) {
-
+	int score = 0;
 	tuple* tuples; 
-	tuples = (tuple*) malloc(9 * sizeof(tuple));
+	tuples = (tuple*) malloc(N * sizeof(tuple));
 
-	for (int i = 0; i < 9; i++) {
+	// populate array of tuples
+	for (int i = 0; i < N; i++) {
 		tuples[i].v1 = data[i][0];
 		tuples[i].v2 = data[i][1];
 	}
 
-	// testing to see tuple insertion 
-	for (int i = 0; i < 9; i++) {
-		printf("data.v1: %d ", tuples[i].v1);
-		printf("data.v2: %d\n", tuples[i].v2);
+	for (int i = 0; i < N; i++) {
+		tuple *current = (tuple*) malloc(sizeof(tuple)); 
+		current = reverse(&tuples[i]);
+		for (int j = 0; j < N; j++) {
+			score += compare(current, &tuples[j]);
+		}
+		
 	}
-	
-	return;
+	return score/2;
 }
 
+// create 2d array with N rows, and 2 columns of random numbers
+int** generate_array(int N) {
+	int **arr = (int**)malloc(N * sizeof(int*));
+
+	for (int i = 0; i < N; i++) {
+		arr[i] = (int*) malloc(2 * sizeof(int)); 
+	}
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < 2; j++) {
+			arr[i][0] = rand() % 10;
+			arr[i][1] = rand() % 10;
+		}
+	}
+
+	return arr;
+}
+
+
 void main(int argc, char** argv) {
-	int data[9][2] = {
-			{1,2},
-			{2,3},
-			{4,5}, 
-			{2,1},
-			{3,2},
-			{8,6},
-			{9,4},
-			{2,6},
-			{6,2},
-		};
+	// int data[9][2] = {
+	// 		{1,2}, 	// match 1
+	// 		{2,3},	// match 2
+	// 		{4,5}, 
+	// 		{2,1},  // match 1
+	// 		{3,2},	// match 2
+	// 		{8,6},
+	// 		{9,4},
+	// 		{2,6},	// match 3
+	// 		{6,2},	// match 3
+	// 	};
 
-	// recippar(data);
+	int N = 50;
+	int** data_arr = generate_array(N);
+	for (int i = 0; i < N; i++) {
+		printf("a: %d ", data_arr[i][0]);
+		printf("b: %d\n", data_arr[i][1]);
 
-	// testing out reverse tuples
-	tuple *t = (tuple*) malloc(sizeof(tuple));
-	t->v1 = 1; 
-	t->v2 = 10; 
+	}
 
-	tuple *t2 = t;
-
-	if (compare(t, t2) == 0)
-		printf("true\n");
-	else
-		printf("false\n");
-	// t2 = reverse(t); 
-
-	// printf ("%d, %d", t->v1, t->v2);
-	// printf ("\n");
-	// printf ("%d, %d", t2->v1, t2->v2);
-	// printf ("\n");
-
+	int score = recippar(data_arr, N);
+	printf("score: %d\n", score);
 
 	return;
 }
