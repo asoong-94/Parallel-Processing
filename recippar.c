@@ -17,8 +17,8 @@ typedef struct {
 // if match, add 1 to score
 int compare(tuple *t1, tuple *t2) {
 	if ((t1->v1 == t2->v1) && (t1->v2 == t2->v2)) {
-		t1->found_match = true;
-		t2->found_match = true;
+		// t1->found_match = true;
+		// t2->found_match = true;
 		return 1;
 	}
 
@@ -39,8 +39,7 @@ int recippar(int **data, int N) {
 
 	int score = 0;
 
-	tuple* tuples;
-	tuples = (tuple*) malloc(N * sizeof(tuple));
+	tuple* tuples = (tuple*) malloc(N * sizeof(tuple));
 	#pragma omp parallel 
 	{
 		int nth = omp_get_num_threads(); 
@@ -63,6 +62,7 @@ int recippar(int **data, int N) {
 				for (int j = 0; j < N; j++) {
 					if (compare(current, &tuples[j]) == 1) {
 						tuples[j].found_match = true;
+						tuples[i].found_match = true;
 						score += 1;
 					}
 				}
@@ -92,19 +92,8 @@ int** generate_array(int N) {
 
 
 void main(int argc, char** argv) {
-	// int data[9][2] = {
-	// 		{1,2}, 	// match 1
-	// 		{2,3},	// match 2
-	// 		{4,5},
-	// 		{2,1},  // match 1
-	// 		{3,2},	// match 2
-	// 		{8,6},
-	// 		{9,4},
-	// 		{2,6},	// match 3
-	// 		{6,2},	// match 3
-	// 	};
 
-	int N = 100000;
+	int N = 10000;
 	int** data_arr = generate_array(N);
 	for (int i = 0; i < N; i++) {
 		printf("a: %d ", data_arr[i][0]);
@@ -116,3 +105,9 @@ void main(int argc, char** argv) {
 
 	return;
 }
+
+
+
+
+						
+						
