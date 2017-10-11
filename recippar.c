@@ -8,6 +8,12 @@ typedef struct {
 	int v2; 
 } tuple; 
 
+int compare(tuple *t1, tuple *t2) {
+	if ((t1->v1 == t2->v1) && (t1->v2 == t2->v2))
+		return 0;
+
+	return -1;
+}
 
 tuple* reverse(tuple *t) {
 	tuple *t2 = (tuple*) malloc(sizeof(tuple));
@@ -57,13 +63,18 @@ void main(int argc, char** argv) {
 	t->v1 = 1; 
 	t->v2 = 10; 
 
-	tuple *t2;
-	t2 = reverse(t); 
+	tuple *t2 = t;
 
-	printf ("%d, %d", t->v1, t->v2);
-	printf ("\n");
-	printf ("%d, %d", t2->v1, t2->v2);
-	printf ("\n");
+	if (compare(t, t2) == 0)
+		printf("true\n");
+	else
+		printf("false\n");
+	// t2 = reverse(t); 
+
+	// printf ("%d, %d", t->v1, t->v2);
+	// printf ("\n");
+	// printf ("%d, %d", t2->v1, t2->v2);
+	// printf ("\n");
 
 
 	return;
