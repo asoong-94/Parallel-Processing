@@ -38,26 +38,39 @@ tuple* reverse(tuple *t) {
 int recippar(int **data, int N) {
 
 	int score = 0;
+
 	tuple* tuples;
 	tuples = (tuple*) malloc(N * sizeof(tuple));
+	#pragma omp parallel 
+	{
+		int nth = omp_get_num_threads(); 
+		int me = omp_get_thread_num(); 
 
-	// populate array of tuples
-	for (int i = 0; i < N; i++) {
-		tuples[i].v1 = data[i][0];
-		tuples[i].v2 = data[i][1];
-		tuples[i].found_match = false;
-	}
-
-	for (int i = 0; i < N; i++) {
-		tuple *current = (tuple*) malloc(sizeof(tuple));
-		if(current->found_match == false) {
-			current = reverse(&tuples[i]);
-			for (int j = 0; j < N; j++) {
-				score += compare(current, &tuples[j]);
-			}
+		// populate array of tuples
+		#pragma omp for
+		for (int i = 0; i < N; i++) {
+			tuples[i].v1 = data[i][0];
+			tuples[i].v2 = data[i][1];
+			tuples[i].found_match = false;
 		}
+		
+		for (int i = 0; i < N; i++) {
+			tuple *current = &tuples[i];// (tuple*) malloc(sizeof(tuple));
+			// current = &tuples[i];
+			if(current->found_match == false) {
+				current = reverse(&tuples[i]);
+				#pragma omp for
+				for (int j = 0; j < N; j++) {
+					if (compare(current, &tuples[j]) == 1) {
+						tuples[j].found_match = true;
+						score += 1;
+					}
+				}
+			}
+		}	
 	}
-	return score/2;
+	
+	return score;
 }
 
 // create 2d array with N rows, and 2 columns of random numbers
@@ -69,8 +82,8 @@ int** generate_array(int N) {
 	}
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < 2; j++) {
-			arr[i][0] = rand() % 3;
-			arr[i][1] = rand() % 3;
+			arr[i][0] = rand() % 50;
+			arr[i][1] = rand() % 50;
 		}
 	}
 
@@ -91,7 +104,7 @@ void main(int argc, char** argv) {
 	// 		{6,2},	// match 3
 	// 	};
 
-	int N = 10;
+	int N = 100000;
 	int** data_arr = generate_array(N);
 	for (int i = 0; i < N; i++) {
 		printf("a: %d ", data_arr[i][0]);
