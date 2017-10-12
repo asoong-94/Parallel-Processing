@@ -40,10 +40,10 @@ int recippar(int **data, int N) {
 	int score = 0;
 
 	tuple* tuples = (tuple*) malloc(N * sizeof(tuple));
-	#pragma omp parallel 
+	#pragma omp parallel
 	{
-		int nth = omp_get_num_threads(); 
-		int me = omp_get_thread_num(); 
+		int nth = omp_get_num_threads();
+		int me = omp_get_thread_num();
 
 		// populate array of tuples
 		#pragma omp for
@@ -52,11 +52,11 @@ int recippar(int **data, int N) {
 			tuples[i].v2 = data[i][1];
 			tuples[i].found_match = false;
 		}
-		
+
 		for (int i = 0; i < N; i++) {
 			tuple *current = &tuples[i];// (tuple*) malloc(sizeof(tuple));
 			// current = &tuples[i];
-			if(current->found_match == false) {
+			if(current->found_match == false && !(current->v1 == current->v2)) {
 				current = reverse(&tuples[i]);
 				#pragma omp for
 				for (int j = 0; j < N; j++) {
@@ -67,9 +67,9 @@ int recippar(int **data, int N) {
 					}
 				}
 			}
-		}	
+		}
 	}
-	
+
 	return score;
 }
 
@@ -82,8 +82,8 @@ int** generate_array(int N) {
 	}
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < 2; j++) {
-			arr[i][0] = rand() % 50;
-			arr[i][1] = rand() % 50;
+			arr[i][0] = rand() % 5;
+			arr[i][1] = rand() % 5;
 		}
 	}
 
@@ -93,7 +93,7 @@ int** generate_array(int N) {
 
 void main(int argc, char** argv) {
 
-	int N = 10000;
+	int N = 5;
 	int** data_arr = generate_array(N);
 	for (int i = 0; i < N; i++) {
 		printf("a: %d ", data_arr[i][0]);
@@ -105,9 +105,3 @@ void main(int argc, char** argv) {
 
 	return;
 }
-
-
-
-
-						
-						
