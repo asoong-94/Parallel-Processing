@@ -1,7 +1,7 @@
 #include <omp.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <time.h>
 
 #define true 1
 #define false 0
@@ -90,6 +90,36 @@ int** generate_array(int N) {
 	return arr;
 }
 
+int recippar_serial(int **data, int N) {
+
+	int score = 0;
+
+	tuple* tuples = (tuple*) malloc(N * sizeof(tuple));
+
+	// populate array of tuples
+	for (int i = 0; i < N; i++) {
+		tuples[i].v1 = data[i][0];
+		tuples[i].v2 = data[i][1];
+		tuples[i].found_match = false;
+
+
+	for (int i = 0; i < N; i++) {
+		tuple *current = &tuples[i];// (tuple*) malloc(sizeof(tuple));
+		// current = &tuples[i];
+		if(current->found_match == false && !(current->v1 == current->v2)) {
+			current = reverse(&tuples[i]);
+			for (int j = 0; j < N; j++) {
+				if (compare(current, &tuples[j]) == 1) {
+					tuples[j].found_match = true;
+					tuples[i].found_match = true;
+					score += 1;
+				}
+			}
+		}
+	}
+}
+	return score;
+}
 
 void main(int argc, char** argv) {
 
@@ -100,8 +130,19 @@ void main(int argc, char** argv) {
 		printf("b: %d\n", data_arr[i][1]);
 	}
 
+	clock_t begin_parallel = clock();
 	int score = recippar(data_arr, N);
 	printf("score: %d\n", score);
+	clock_t end_parallel = clock();
+	double time_spent_parallel = (double)(end_parallel - begin_parallel) / CLOCKS_PER_SEC;
+	printf("time parallel: %d\n", time_spent_parallel);
+
+	clock_t begin_serial = clock();
+	int score_serial = recippar_serial(data_arr, N);
+	printf("score: %d\n", score_serial);
+	clock_t end_serial = clock();
+	double time_spent_serial = (double)(end_serial - begin_serial) / CLOCKS_PER_SEC;
+	printf("time serial: %d\n", time_spent_serial);
 
 	return;
 }
