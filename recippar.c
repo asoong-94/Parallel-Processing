@@ -16,10 +16,13 @@ int recippar(int **data, int N) {
 	// int tempV1 = 0;
 	// int tempV2 = 0; 
 
+	#pragma omp parallel 
 	for (int i = 0; i < N; i++) {
 		// current vertex to be compared
 		int currentV1 = data[i][0];
 		int currentV2 = data[i][1]; 
+
+		#pragma omp for 
 		for (int j = 0; j < N; j++ ) {
 			int tempV1 = data[j][0];
 			int tempV2 = data[j][1];
@@ -28,7 +31,6 @@ int recippar(int **data, int N) {
 				printf("match at: %d and %d\n", tempV1, tempV2);
 			}
 		}
-
 	}
 	return score / 2;
 }
@@ -55,7 +57,8 @@ void main(int argc, char** argv) {
 
 
 	int N = 10;
-	int** data_arr = (int**)malloc(10 * sizeof(int*));
+
+	int** data_arr = (int**)malloc(N * sizeof(int*));
 	for (int i = 0; i < N; i++) {
 		data_arr[i] = (int*)malloc(2 * sizeof(int));
 	}
