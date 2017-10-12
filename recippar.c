@@ -30,7 +30,7 @@ int recippar(int **data, int N) {
 		}
 
 	}
-	return score;
+	return score / 2;
 }
 
 // create 2d array with N rows, and 2 columns of random numbers
