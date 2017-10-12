@@ -20,7 +20,7 @@ int recippar(int **data, int N) {
 		// current vertex to be compared
 		int currentV1 = data[i][0];
 		int currentV2 = data[i][1]; 
-		for (int j = 0; j < 2; j++ ) {
+		for (int j = 0; j < N; j++ ) {
 			int tempV1 = data[j][0];
 			int tempV2 = data[j][1];
 			if (currentV1 == tempV2 && currentV2 == tempV1) {
@@ -29,7 +29,6 @@ int recippar(int **data, int N) {
 			}
 		}
 
-		printf("i: %d", i);
 	}
 	return score;
 }
