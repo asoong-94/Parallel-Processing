@@ -52,6 +52,24 @@ int** generate_array(int N) {
 	return arr;
 }
 
+void readFile() {
+	FILE *fp; 
+	char *line = NULL; 
+	size_t len = 0; 
+	size_t read = 0;
+
+	fp = fopen("data.txt", "r"); 
+	while ((read = getline(&line, &len, fp)) != -1) {
+		printf("length: %zu", read);
+		printf("line: %s", read);
+	}
+
+	fclose(fp); 
+	if (line) 
+		free(line);
+
+	return;
+}
 
 void main(int argc, char** argv) {
 
@@ -80,14 +98,15 @@ void main(int argc, char** argv) {
 	data_arr[8][0] = 9; data_arr[8][1] = 7; 
 	data_arr[9][0] = 8; data_arr[9][1] = 5; 
 
-	for (int i = 0; i < N; i++) {
-		printf("a: %d ", data_arr[i][0]);
-		printf("b: %d\n", data_arr[i][1]);
-	}
+	// for (int i = 0; i < N; i++) {
+	// 	printf("a: %d ", data_arr[i][0]);
+	// 	printf("b: %d\n", data_arr[i][1]);
+	// }
 
 	int score = recippar(data_arr, N);
-	printf("score: %d\n", score);
+	// printf("score: %d\n", score);
 
+	readFile();
 	return;
 }
 
