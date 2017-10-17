@@ -4,20 +4,19 @@ source("bin_search.R")
 data =  read.table("../data/twitter_combined.txt", sep = " ")
 data = data[order(data[,1]),]
 
-data = data.matrix(data)
-
 col1= unlist(data[,1])
 
+data = data.matrix(data)
+
+
 score = 0 
+N = max(dim(data))
+ptm<-proc.time() 
 
-N = nrow(data)
-
-for (i in 1:nrow(data)) {
+for (i in 1:N) {
 		row = unlist(data[i,])
 		index = bin_search(col1,1,N,row[2])
-		
-  if (i%%20000==0) {cat(i,"\n")}
-		
+
 		if (index!=-1) { 
 						found = FALSE
 						i = index
@@ -43,5 +42,8 @@ for (i in 1:nrow(data)) {
 		 }
 }
 
-score = score/2 -7 // 7 is the number of reflexive nodes
+score = score/2 -7 
+# 7 is the number of reflexive nodes
 
+cat("score: ", score)
+print(proc.time() - ptm)
