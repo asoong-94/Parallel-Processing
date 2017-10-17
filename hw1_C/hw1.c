@@ -139,10 +139,10 @@ void main(int argc, char* argv[]) {
 	tuple* tuples = to_tuple_array(N, file_path);
 	clock_t begin = clock();
 
-	qsort(tuples, N, sizeof(tuples[0]),comparator_using_tuple);
+	qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
 
 	int reflexive_nodes = 0;
-	#pragma omp parallel
+	#pragma omp parallel shared(score)
 	{
 		#pragma omp for
 		for (int i = 0; i < N; i++) {
@@ -151,23 +151,26 @@ void main(int argc, char* argv[]) {
 				int index = iter_binarySearch(tuples, 0, N-1, tuples[i].value);
 				if (-1 != index) {
 					// search right
-					int curr = index;
+					int curr_r = index;
+					int curr_l = index;
 					int found = 0;
-					while( found == 0 && curr < N && tuples[curr].key == tuples[i].value ) {
-						if( tuples[i].key == tuples[curr].value) {
+					while( found == 0 && curr_r < N && tuples[curr_r].key == tuples[i].value ) {
+						if( tuples[i].key == tuples[curr_r].value) {
+							#pragma omp critical 
 							score += 1;
 							found = 1;
 						}
-						curr++;
+						curr_r++;
 					}
-					curr = index;
+					// curr = index;
 					// search left
-					while( found == 0 && curr >= 0 && tuples[curr].key == tuples[i].value ) {
-						if( tuples[i].key == tuples[curr].value) {
+					while( found == 0 && curr_l >= 0 && tuples[curr_l].key == tuples[i].value ) {
+						if( tuples[i].key == tuples[curr_l].value) {
+							#pragma omp critical 
 							score += 1;
 							found = 1;
 						}
-						curr --;
+						curr_l --;
 					}
 				}
 			} else {
