@@ -1,5 +1,4 @@
-library(parallel)
-
+library(snow)
 data =  read.table("../data/twitter_combined.txt", sep = " ")
 data = data.matrix(data)
 
@@ -12,7 +11,7 @@ recippar <- function (data) {
   reflexive_num = sum(data[,1]==data[,2])
   
   # create virtual clusters
-		cls <- makePSOCKcluster(rep("localhost",6))
+		cls <- makeSOCKcluster(rep("localhost",6))
 
 	# parallel part 
 		par_search = function(cls,data) {
