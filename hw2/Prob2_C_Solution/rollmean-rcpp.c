@@ -1,6 +1,8 @@
 
 #include <Rcpp.h>
 
+using namespace std; 
+
 // [[Rcpp::export]]
 NumericVector rmRcpp(NumericVector dat, const int window) {
   const int n = dat.size();

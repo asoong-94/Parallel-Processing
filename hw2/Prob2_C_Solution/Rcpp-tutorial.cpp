@@ -1,5 +1,8 @@
 #include <Rcpp.h>
 
+using namespace Rcpp;
+// Rcpp attribute
+
 // [[Rcpp::export]]
 void hello()
 {
