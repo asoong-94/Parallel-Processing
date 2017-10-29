@@ -115,7 +115,7 @@ int recippar(int *edges,int nrow)
 }
 
 // Compile: mpicc -g Problem1.c
-// Run: mpiexec -f hosts3 -n 3 a
+// Run: mpiexec -f hosts3 -n 3 ./a.out 1768149 twitter_combined.txt
 // Note: - hosts3 is the file containing host lists
 //       - -n 3 indicates the number of node being used
 
