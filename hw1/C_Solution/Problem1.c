@@ -143,7 +143,7 @@ int recippar(int *edges,int nrow)
 // char file_path[100] = "./data/";
 // strcat(file_path,argv[2]);
 // printf("file path: %s\n", file_path);
-// int * data = to_array(N, file_path); 
+// int * data = to_array(N, file_path);
 // int score = recippar(data, N);
 // return 0 ;
 //}
