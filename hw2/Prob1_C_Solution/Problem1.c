@@ -108,16 +108,18 @@ int recippar(int *edges,int nrow)
            processor_name, world_rank, world_size);
 
     // Finalize the MPI environment.
-    MPI_Finalize();
+  MPI_Finalize();
 
 	printf("score: %d\n", score/2);
 	return score/2;
 }
 
 // Compile: mpicc -g Problem1.c
-// Run: mpiexec -f hosts3 -n 3 ./a.out 1768149 twitter_combined.txt
+// Run (with CSIF nodes): mpiexec -f hosts3 -n 3 ./a.out 1768149 twitter_combined.txt
+//     (locally)        : mpiexec ./a.out 1768149 twitter_combined.txt
 // Note: - hosts3 is the file containing host lists
 //       - -n 3 indicates the number of node being used
+//       * Make sure that a.out is available on all the nodes in hosts3
 
 int main(int argc, char *argv[])
 {
