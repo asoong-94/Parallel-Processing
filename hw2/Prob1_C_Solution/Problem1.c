@@ -99,7 +99,7 @@ int recippar(int *edges,int nrow)
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 	int world_size;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	
+
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
 	// (Nicola's answer)
@@ -188,9 +188,16 @@ int recippar(int *edges,int nrow)
   // produce the correct answer.
   int score = calculate_score(subarray_scores, world_size);
 
-  MPI_Finalize();
+	// Clean up
+  if (world_rank == 0) {
+    free(tuples);
+  }
+  free(subarray_scores);
+  free(sub_tuple_arr);
 
-	printf("score: %d\n", score/2);
+  MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
+	
 	return score/2;
 }
 
@@ -209,5 +216,6 @@ int main(int argc, char *argv[])
   printf("file path: %s\n", file_path);
   int * data = to_array(N, file_path);
   int score = recippar(data, N);
+	printf("score: %d\n", score);
   return 0;
 }
