@@ -124,10 +124,13 @@ int recippar(int *edges,int nrow)
 	int num_elements_per_proc = 1000;
 	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
 	// Send out the whole edges to all workers
-	MPI_Bcast(edges, num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
-	// Send out a subarrays to all workers
-	MPI_Scatter(edges, num_elements_per_proc, stat_type, sub_tuple_arr,
+	MPI_Bcast(tuples, num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
+	// Send out a subarrays (w/ size num_elements_per_proc) to all workers
+	MPI_Scatter(tuples, num_elements_per_proc, stat_type, sub_tuple_arr,
               num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
+
+	// Find recippars
+	
 
   MPI_Finalize();
 
