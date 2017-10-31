@@ -37,7 +37,7 @@ tuple* to_tuple_array(int N, int *edges) {
 
  for (i=0; i < N;i++)
 	{
-  tuples[i].key = *(edges + i*2);
+  	tuples[i].key = *(edges + i*2);
 		tuples[i].value = *(edges + i*2 +1);
 	}
 	return tuples;
@@ -134,7 +134,7 @@ int recippar(int *edges,int nrow)
 	//Now we are ready to Scatter and Broadcast things
 	// MPI_Send(&_info, 1, stat_type, dest, tag, comm),
 
-	int num_elements_per_proc = 50000;
+	int num_elements_per_proc = nrow/world_size;
 	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
 	assert(sub_tuple_arr != NULL);
 	// Send out the whole edges to all workers
@@ -146,6 +146,7 @@ int recippar(int *edges,int nrow)
 	// Find recippars
 	int subarray_score = 0;
 	int reflexive_nodes = 0;
+	// printf("whole tuple length is %d\n", sizeof(tuples)/sizeof(tuples[0]));
 	for (int i = 0; i < num_elements_per_proc; i++) {
 
 			if(sub_tuple_arr[i].key != sub_tuple_arr[i].value) {	// Otherwise, the node is reflexive
