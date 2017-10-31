@@ -54,6 +54,7 @@ int comparator_using_tuple(const void *p, const void *q) {
 
 int iter_binarySearch(tuple* arr, int l, int r, int x)
 {
+	// printf("first element key, value is %d, %d\n", arr[0].key, arr[1].value);
   while (l <= r)
   {
     int m = l + (r-l)/2;
@@ -99,7 +100,7 @@ int recippar(int *edges,int nrow)
 	tuple* tuples = to_tuple_array(N, edges);
 
 	if (world_rank == 0) {
-		// qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
+		qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
 	}
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
@@ -133,7 +134,7 @@ int recippar(int *edges,int nrow)
 	//Now we are ready to Scatter and Broadcast things
 	// MPI_Send(&_info, 1, stat_type, dest, tag, comm),
 
-	int num_elements_per_proc = 5;
+	int num_elements_per_proc = 50000;
 	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
 	assert(sub_tuple_arr != NULL);
 	// Send out the whole edges to all workers
@@ -149,7 +150,7 @@ int recippar(int *edges,int nrow)
 
 			if(sub_tuple_arr[i].key != sub_tuple_arr[i].value) {	// Otherwise, the node is reflexive
 				int index = iter_binarySearch(tuples, 0, N-1, sub_tuple_arr[i].value);
-				printf("value is %d at index %d\n", sub_tuple_arr[i].key, i );
+				// printf("value is %d at index %d\n", sub_tuple_arr[i].key, i );
 				if (-1 != index) {
 					// search right
 					int curr_r = index;
@@ -176,11 +177,11 @@ int recippar(int *edges,int nrow)
 				reflexive_nodes++;
 			}
 		}
-
+	printf("node %d, subscore %d\n", world_rank, subarray_score);
 	// Gather all partial scores down to all the processes
   int *subarray_scores = (int *)malloc(sizeof(int) * world_size);
   assert(subarray_scores != NULL);
-  MPI_Allgather(&subarray_score, 1, stat_type, subarray_scores, 1, stat_type, MPI_COMM_WORLD);
+  MPI_Allgather(&subarray_score, 1, MPI_INT, subarray_scores, 1, MPI_INT, MPI_COMM_WORLD);
 
 	// Now that we have all of the partial averages, compute the
   // total average of all numbers. Since we are assuming each process computed
