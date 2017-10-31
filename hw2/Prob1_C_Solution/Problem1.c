@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 
 typedef struct {
 	int key;
@@ -74,11 +75,19 @@ int iter_binarySearch(tuple* arr, int l, int r, int x)
   return -1;
 }
 
+int calculate_score(int *array, int num_elements) {
+  int sum = 0;
+  int i;
+  for (i = 0; i < num_elements; i++) {
+    sum += array[i];
+		// printf("i = %d, value is %d", i, array[i]);
+  }
+  return sum;
+}
+
 int recippar(int *edges,int nrow)
 {
 	int N = nrow;
-
-	int score = 0;
 
   int reflexive_nodes = 0;
 
@@ -88,6 +97,9 @@ int recippar(int *edges,int nrow)
 
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
+
+	int world_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
@@ -123,6 +135,7 @@ int recippar(int *edges,int nrow)
 
 	int num_elements_per_proc = 1000;
 	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
+	assert(sub_tuple_arr != NULL);
 	// Send out the whole edges to all workers
 	MPI_Bcast(tuples, num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
 	// Send out a subarrays (w/ size num_elements_per_proc) to all workers
@@ -130,7 +143,48 @@ int recippar(int *edges,int nrow)
               num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
 
 	// Find recippars
-	
+	int subarray_score = 0;
+	for (int i = 0; i < num_elements_per_proc; i++) {
+
+			if(sub_tuple_arr[i].key != sub_tuple_arr[i].value) {	// Otherwise, the node is reflexive
+				int index = iter_binarySearch(tuples, 0, N-1, sub_tuple_arr[i].value);
+				if (-1 != index) {
+					// search right
+					int curr_r = index;
+					int curr_l = index;
+					int found = 0;
+					while( found == 0 && curr_r < N && tuples[curr_r].key == sub_tuple_arr[i].value ) {
+						if( sub_tuple_arr[i].key == tuples[curr_r].value) {
+							subarray_score += 1;
+							found = 1;
+						}
+						curr_r++;
+					}
+					// curr = index;
+					// search left
+					while( found == 0 && curr_l >= 0 && tuples[curr_l].key == sub_tuple_arr[i].value ) {
+						if( sub_tuple_arr[i].key == tuples[curr_l].value) {
+							subarray_score += 1;
+							found = 1;
+						}
+						curr_l--;
+					}
+				}
+			} else {
+				reflexive_nodes++;
+			}
+		}
+
+	// Gather all partial scores down to all the processes
+  int *subarray_scores = (int *)malloc(sizeof(int) * world_size);
+  assert(subarray_scores != NULL);
+  MPI_Allgather(&subarray_score, 1, stat_type, subarray_scores, 1, stat_type, MPI_COMM_WORLD);
+
+	// Now that we have all of the partial averages, compute the
+  // total average of all numbers. Since we are assuming each process computed
+  // an average across an equal amount of elements, this computation will
+  // produce the correct answer.
+  int score = calculate_score(subarray_scores, world_size);
 
   MPI_Finalize();
 
