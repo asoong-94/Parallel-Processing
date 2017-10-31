@@ -89,25 +89,46 @@ int recippar(int *edges,int nrow)
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
 
-  // Get the number of processes
-  int world_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	// Setup the custom MPI_datatype
+	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
+	// (Nicola's answer)
+	tuple _info;
+	int count; //Says how many kinds of data your structure has
+	count = 1; //1, 'cause you just have int
 
-  // Get the rank of the process
-  int world_rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	// Says the type of every block
+	MPI_Datatype array_of_types[count];
+	// You just have int
+	array_of_types[0] = MPI_INT;
 
-  // Get the name of the processor
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    int name_len;
-    MPI_Get_processor_name(processor_name, &name_len);
+	// Says how many elements for block
+	int array_of_blocklengths[count];
+	// You have 2 int
+	array_of_blocklengths[0] = 2;
 
-    // Print off a hello world message
-    printf("Hello world from processor %s, rank %d"
-           " out of %d processors\n",
-           processor_name, world_rank, world_size);
+	/*Says where every block starts in memory, counting from the beginning of the struct.*/
+	MPI_Aint array_of_displaysments[count];
+	MPI_Aint address1, address2;
+	MPI_Get_address(&_info,&address1);
+	MPI_Get_address(&_info.key,&address2);
+	array_of_displaysments[0] = address2 - address1;
 
-    // Finalize the MPI environment.
+	/*Create MPI Datatype and commit*/
+	MPI_Datatype stat_type;
+	MPI_Type_create_struct(count, array_of_blocklengths, array_of_displaysments, array_of_types, &stat_type);
+	MPI_Type_commit(&stat_type);
+
+	//Now we are ready to Scatter and Broadcast things
+	// MPI_Send(&_info, 1, stat_type, dest, tag, comm),
+
+	int num_elements_per_proc = 1000;
+	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
+	// Send out the whole edges to all workers
+	MPI_Bcast(edges, num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
+	// Send out a subarrays to all workers
+	MPI_Scatter(edges, num_elements_per_proc, stat_type, sub_tuple_arr,
+              num_elements_per_proc, stat_type, 0, MPI_COMM_WORLD);
+
   MPI_Finalize();
 
 	printf("score: %d\n", score/2);
