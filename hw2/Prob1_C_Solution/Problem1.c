@@ -89,18 +89,18 @@ int recippar(int *edges,int nrow)
 {
 	int N = nrow;
 
-  int reflexive_nodes = 0;
-
-	tuple* tuples = to_tuple_array(N, edges);
-
-	qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
-
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
 
+	int world_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 	int world_size;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+	tuple* tuples = to_tuple_array(N, edges);
 
+	if (world_rank == 0) {
+		// qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
+	}
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
 	// (Nicola's answer)
@@ -133,7 +133,7 @@ int recippar(int *edges,int nrow)
 	//Now we are ready to Scatter and Broadcast things
 	// MPI_Send(&_info, 1, stat_type, dest, tag, comm),
 
-	int num_elements_per_proc = 1000;
+	int num_elements_per_proc = 5;
 	tuple* sub_tuple_arr = (tuple *)malloc(sizeof(tuple) * num_elements_per_proc);
 	assert(sub_tuple_arr != NULL);
 	// Send out the whole edges to all workers
@@ -144,10 +144,12 @@ int recippar(int *edges,int nrow)
 
 	// Find recippars
 	int subarray_score = 0;
+	int reflexive_nodes = 0;
 	for (int i = 0; i < num_elements_per_proc; i++) {
 
 			if(sub_tuple_arr[i].key != sub_tuple_arr[i].value) {	// Otherwise, the node is reflexive
 				int index = iter_binarySearch(tuples, 0, N-1, sub_tuple_arr[i].value);
+				printf("value is %d at index %d\n", sub_tuple_arr[i].key, i );
 				if (-1 != index) {
 					// search right
 					int curr_r = index;
