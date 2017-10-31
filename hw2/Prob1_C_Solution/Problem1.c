@@ -89,7 +89,9 @@ int calculate_score(int *array, int num_elements) {
 int recippar(int *edges,int nrow)
 {
 	int N = nrow;
+	tuple* tuples = to_tuple_array(N, edges);
 
+	qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
 
@@ -97,10 +99,7 @@ int recippar(int *edges,int nrow)
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 	int world_size;
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-	tuple* tuples = to_tuple_array(N, edges);
-
-	qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
-
+	
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
 	// (Nicola's answer)
