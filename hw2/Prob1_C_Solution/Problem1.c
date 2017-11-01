@@ -92,19 +92,19 @@ int recippar(int *edges,int nrow)
 	tuple* tuples = to_tuple_array(N, edges);
 
 	qsort(tuples, N, sizeof(tuples[0]), comparator_using_tuple);
-  // Initialize the MPI environment
-  MPI_Init(NULL, NULL);
+  	// Initialize the MPI environment
+  	MPI_Init(NULL, NULL);
 
 	int world_rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 	int world_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  	MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
 	// Setup the custom MPI_datatype
 	// Ref: https://stackoverflow.com/questions/18165277/how-to-send-a-variable-of-type-struct-in-mpi-send
 	// (Nicola's answer)
 	tuple _info;
-	int count; //Says how many kinds of data your structure has
+	int count; //Says how many kinds of data your structure has: only 1 int
 	count = 1; //1, 'cause you just have int
 
 	// Says the type of every block
@@ -114,7 +114,7 @@ int recippar(int *edges,int nrow)
 
 	// Says how many elements for block
 	int array_of_blocklengths[count];
-	// You have 2 int
+	// You have 2 int's per tuple you're sending
 	array_of_blocklengths[0] = 2;
 
 	/*Says where every block starts in memory, counting from the beginning of the struct.*/
@@ -123,9 +123,12 @@ int recippar(int *edges,int nrow)
 	MPI_Get_address(&_info,&address1);
 	MPI_Get_address(&_info.key,&address2);
 	array_of_displaysments[0] = address2 - address1;
+	// array_of_displaysments[0] = 0;
+
 
 	/*Create MPI Datatype and commit*/
 	MPI_Datatype stat_type;
+	// https://www.mpich.org/static/docs/v3.1/www3/MPI_Type_create_struct.html
 	MPI_Type_create_struct(count, array_of_blocklengths, array_of_displaysments, array_of_types, &stat_type);
 	MPI_Type_commit(&stat_type);
 
@@ -211,9 +214,13 @@ int recippar(int *edges,int nrow)
 int main(int argc, char *argv[])
 {
   int N = atoi(argv[1]);
+
+  // twitter_combined.txt
   char file_path[100] = "../../data/";
   strcat(file_path,argv[2]);
   printf("file path: %s\n", file_path);
+
+  // makes N elements from twitter_combined into an array
   int * data = to_array(N, file_path);
   int score = recippar(data, N);
 	printf("score: %d\n", score);
