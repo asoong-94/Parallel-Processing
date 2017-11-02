@@ -54,7 +54,6 @@ int comparator_using_tuple(const void *p, const void *q) {
 
 int iter_binarySearch(tuple* arr, int l, int r, int x)
 {
-	// printf("first element key, value is %d, %d\n", arr[0].key, arr[1].value);
   while (l <= r)
   {
     int m = l + (r-l)/2;
@@ -81,7 +80,6 @@ int calculate_score(int *array, int num_elements) {
   int i;
   for (i = 0; i < num_elements; i++) {
     sum += array[i];
-		// printf("i = %d, value is %d", i, array[i]);
   }
   return sum;
 }
@@ -147,12 +145,11 @@ int recippar(int *edges,int nrow)
 	// Find recippars
 	int subarray_score = 0;
 	int reflexive_nodes = 0;
-	// printf("whole tuple length is %d\n", sizeof(tuples)/sizeof(tuples[0]));
 	for (int i = 0; i < num_elements_per_proc; i++) {
 
 			if(sub_tuple_arr[i].key != sub_tuple_arr[i].value) {	// Otherwise, the node is reflexive
 				int index = iter_binarySearch(tuples, 0, N-1, sub_tuple_arr[i].value);
-				// printf("value is %d at index %d\n", sub_tuple_arr[i].key, i );
+
 				if (-1 != index) {
 					// search right
 					int curr_r = index;
@@ -179,7 +176,6 @@ int recippar(int *edges,int nrow)
 				reflexive_nodes++;
 			}
 		}
-	printf("node %d, subscore %d\n", world_rank, subarray_score);
 	// Gather all partial scores down to all the processes
   int *subarray_scores = (int *)malloc(sizeof(int) * world_size);
   assert(subarray_scores != NULL);
@@ -200,7 +196,7 @@ int recippar(int *edges,int nrow)
 
   MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
-	
+
 	return score/2;
 }
 
@@ -211,18 +207,18 @@ int recippar(int *edges,int nrow)
 //       - -n 3 indicates the number of node being used
 //       * Make sure that a.out is available on all the nodes in hosts3
 
-int main(int argc, char *argv[])
-{
-  int N = atoi(argv[1]);
-
-  // twitter_combined.txt
-  char file_path[100] = "../../data/";
-  strcat(file_path,argv[2]);
-  printf("file path: %s\n", file_path);
-
-  // makes N elements from twitter_combined into an array
-  int * data = to_array(N, file_path);
-  int score = recippar(data, N);
-	printf("score: %d\n", score);
-  return 0;
-}
+// int main(int argc, char *argv[])
+// {
+//   int N = atoi(argv[1]);
+//
+//   // twitter_combined.txt
+//   char file_path[100] = "../../data/";
+//   strcat(file_path,argv[2]);
+//   // printf("file path: %s\n", file_path);
+//
+//   // makes N elements from twitter_combined into an array
+//   int * data = to_array(N, file_path);
+//   int score = recippar(data, N);
+// 	// printf("score: %d\n", score);
+//   return 0;
+// }
