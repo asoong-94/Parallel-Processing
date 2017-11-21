@@ -79,11 +79,9 @@ int main(int argc, char** argv) {
 
 	// host input and output array
 	float *h_in;
-	float *h_out; 
 
 	// allocate memory for host arrays 
 	h_in = (float*)malloc(input_size);
-	h_out = (float*)malloc(input_size);
 
 	// fill host array with random numbers 
 	for (int i = 0; i < n; i++) {
@@ -92,11 +90,9 @@ int main(int argc, char** argv) {
 
 	// device input and output array 
 	float *d_in; 
-	float *d_out; 
 
 	// allocate memory for device arrays 
 	cudaMalloc((void**) &d_in, input_size);
-	cudaMalloc((void**) &d_out, input_size);
 
 	// copy host input to device input 
 	cudaMemcpy(d_in, h_in, input_size, cudaMemcpyHostToDevice);
@@ -125,8 +121,8 @@ int main(int argc, char** argv) {
 
 
 	// free gpu memory 
-	cudaFree(d_in); 
-	cudaFree(d_out); 
+	cudaFree(d_startend); 
+	cudaFree(d_bigmax); 
 
 	return 0; 
 }
