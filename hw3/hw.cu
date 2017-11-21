@@ -7,57 +7,22 @@
 #define MAX_THREADS_PER_BLOCK 1024 
 #define RANDMAX 100
 
-// __global__ void mean(float **subarr, int start, int end, float *out) {
-// 	float tot = 0; 
-// 	// for (int i = 0; i < end; i++) {
-// 	// 	tot += *subarr[i]; 
-// 	// }
-
-// 	for (int i = 0; i < 10; i++0) {
-// 	}
-// 	__syncthreads(); 
-
-// }
-
-// __global__ void kernel(float *x) {
-// 	// vsize
-// 	extern __shared__ float sv[];
-// 	int me = blockIdx.x * threadIdx.x; 
-
-
-
-// }
-
-
-
-// void maxburst(float *x, int n, int k, int *startend, float *bigmax) {
-// 	int NUM_BLOCKS = n / MAX_THREADS_PER_BLOCK;
-// 	int vsize = n * sizeof(float);
-
-// 	float *d_x; // device array 
-// 	cudaMalloc((void**) &d_x, vsize); // allocate memory on device 
-// 	cudaMemcpy(d_x, x, vsize, cudaMemcpyHostToDevice);
-
-// 	dim3 gridDim(NUM_BLOCKS,1); 
-// 	dim3 blockDim(MAX_THREADS_PER_BLOCK,1,1);
-	
-// 	//kernel<<< gridDim, blockDim >>>(d_x);
-
-// 	float res = 0;
-// 	float res_out = 0;	
-// 	cudaMalloc((void**) &res, sizeof(float));
-// 	mean<<<gridDim, blockDim>>>(&d_x, 10, 15, res); 
-// 	cudaMemcpy(&res_out, &res, sizeof(float), cudaMemcpyDeviceToHost);
-// 	printf("mean: %f", res_out);
-// }
+__device__ float mean(float *y, int s, int e) {
+	int i; 
+	float total = 0; 
+	for (int i = s; i < e; i++) {
+		total += y[i];
+	}
+	return total / (e - s + 1);
+}
 
 __global__ void findMax(float *x, int n, int k, int *startend, float *bigmax) {
 	// shared memory of size: input_size
 	extern __shared__ float s[];
 
 	// thread id
-	int me;  
-
+	int me = blockDim.x * blockIdx.x + threadIdx.x;
+	printf("me: %d", me);
 	// copy global data to shared data 
 	s[me] = x[me];
 
@@ -74,16 +39,33 @@ __global__ void findMax(float *x, int n, int k, int *startend, float *bigmax) {
 
 	float xbar; 	// scratch variable 
 
-	me = blockDim.x * blockIdx.x + threadIdx.x;
 	mymaxval = -1;
 
+	for (perstart = me; perstart <= n - k; perstart ++) {
+		for (perlen = k; perlen <= n - perstart; perlen ++) {
+			if (perlen == k) {
+				xbar = mean(s, perstart, perend); 
+			}
+			else {
+				// update hold mean 
+				pl1 = perlen - 1; 
+				xbar = (pl1 * xbar + s[perend]) / perlen; 
+			}
 
-
-
-
-
+			if (xbar > mymaxval) {
+				mymaxval = xbar; 
+				mystartmax = perstart; 
+				myendmax = perend; 
+			}
+		}
+	}
 
 	__syncthreads();
+	if (mymaxval > *bigmax) {
+		*bigmax = mymaxval; 
+		startend[0] = mystartmax; 
+		startend[1] = myendmax; 
+	}
 }
 
 
@@ -136,6 +118,9 @@ int main(int argc, char** argv) {
 	cudaMemcpy(d_startend, h_startend, input_size, cudaMemcpyDeviceToHost);
 	cudaMemcpy(d_bigmax, h_bigmax, input_size, cudaMemcpyDeviceToHost);
 
+	printf("dstartend.1: %d\n", h_startend[0]);
+	printf("dstartend.2: %d\n", h_startend[1]);
+	printf("d_bigmax: %f\n", h_bigmax);
 
 	// free gpu memory 
 	cudaFree(d_startend); 
