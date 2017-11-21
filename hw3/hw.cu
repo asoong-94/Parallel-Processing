@@ -53,8 +53,22 @@
 
 
 __global__ void findMax(float *d_in, float *d_out) {
+	// shared memory of size: input_size
+	extern __shared__ float s[];
 
+	// thread id
 	int me = blockDim.x * blockIdx.x + threadIdx.x;
+
+	// copy global data to shared data 
+	s[me] = d_in[me];
+
+
+
+
+
+
+	__syncthreads();
+	d_out[me] = s[me];
 }
 
 
@@ -86,15 +100,23 @@ int main(int argc, char** argv) {
 	cudaMalloc((void**) &d_in, input_size);
 	cudaMalloc((void**) &d_out, input_size);
 
+	// copy host input to device input 
+	cudaMemcpy(d_in, h_in, input_size, cudaMemcpyHostToDevice);
+
 	// create kernel invocation parameters
 	int NUM_BLOCKS = n / MAX_THREADS_PER_BLOCK;
 	dim3 dimGrid(NUM_BLOCKS, 1); 
 	dim3 dimBlock(MAX_THREADS_PER_BLOCK, 1);
 
+	// kernel invocation
+	findMax <<< dimGrid, dimBlock, input_size >>>(d_in, d_out); 
 
-	findMax <<< dimGrid, dimBlock >>>(d_in, d_out); 
+	// copy result from device to host
+	cudaMemcpy(d_out, h_out, input_size, cudaMemcpyDeviceToHost);
 
-
+	// free gpu memory 
+	cudaFree(d_in); 
+	cudaFree(d_out); 
 
 	return 0; 
 }
