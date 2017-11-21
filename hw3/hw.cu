@@ -56,10 +56,27 @@ __global__ void findMax(float *x, int n, int k, int *startend, float *bigmax) {
 	extern __shared__ float s[];
 
 	// thread id
-	int me = blockDim.x * blockIdx.x + threadIdx.x;
+	int me;  
 
 	// copy global data to shared data 
 	s[me] = x[me];
+
+	int perstart; // period start
+	int perlen;   // period length 
+	int perend;   // perlen end 
+	int pl1;      // perlen - 1
+
+	// for best found by this thread so far 
+	int mystartmax; // start location 
+	int myendmax;   // end location 
+
+	float mymaxval; // max value 
+
+	float xbar; 	// scratch variable 
+
+	me = blockDim.x * blockIdx.x + threadIdx.x;
+	mymaxval = -1;
+
 
 
 
