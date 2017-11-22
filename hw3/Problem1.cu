@@ -1,5 +1,3 @@
-//When you set the numthreadsBlock = 64 or smaller, you can not get the corret answer; still the index is not correct
-// when testing the code, k should be an odd number because k is assumed to be odd when computing the truth
 #include <stdio.h>
 #include <cuda.h>
 
